@@ -21,7 +21,14 @@ export default function App() {
   const hideNav = location.pathname === '/onboarding' || location.pathname === '/workout'
 
   return (
-    <div className="mx-auto max-w-lg min-h-dvh pb-24">
+    <div
+      className="mx-auto max-w-lg min-h-dvh pb-24"
+      style={{
+        paddingTop: 'env(safe-area-inset-top)',
+        paddingLeft: 'env(safe-area-inset-left)',
+        paddingRight: 'env(safe-area-inset-right)',
+      }}
+    >
       <Routes>
         <Route path="/" element={<Dashboard />} />
         <Route path="/onboarding" element={<Onboarding />} />
