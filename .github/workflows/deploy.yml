@@ -23,7 +23,11 @@ jobs:
         with:
           node-version: 24
           cache: npm
-      - run: npm ci
+      # Use `npm install` rather than `npm ci`: the lockfile is generated on
+      # macOS-arm64, and `npm ci`'s strict installer fails on the linux-x64
+      # runner over platform-specific native binaries (Rolldown/Rollup).
+      # `npm install` resolves the correct binary for the runner's platform.
+      - run: npm install --no-audit --no-fund
       - run: npm run build
       - uses: actions/upload-pages-artifact@v3
         with:
