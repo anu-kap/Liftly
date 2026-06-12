@@ -42,69 +42,75 @@ body::after {
 
 ::selection { background: var(--color-accent); color: #0a0a0b; }
 
-/* ── Primitives ─────────────────────────────────────────── */
+/* ── Primitives ─────────────────────────────────────────────
+   These live in the `components` layer so per-element Tailwind
+   utilities (bg-*, border-*, text-*) always override them. Tailwind v4
+   orders layers theme → base → components → utilities, and unlayered CSS
+   would otherwise beat every utility — silently killing active/selected
+   highlights and color overrides. */
+@layer components {
+  .card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-line);
+    border-radius: 16px;
+  }
 
-.card {
-  background: var(--color-surface);
-  border: 1px solid var(--color-line);
-  border-radius: 16px;
-}
+  .btn-primary {
+    background: var(--color-accent);
+    color: #0a0a0b;
+    font-weight: 700;
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border-radius: 10px;
+    padding: 0.8rem 1.5rem;
+    transition: transform 0.08s ease, filter 0.15s ease;
+  }
+  .btn-primary:active { transform: scale(0.98); filter: brightness(1.1); }
+  .btn-primary:disabled { opacity: 0.35; }
 
-.btn-primary {
-  background: var(--color-accent);
-  color: #0a0a0b;
-  font-weight: 700;
-  font-size: 0.8rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  border-radius: 10px;
-  padding: 0.8rem 1.5rem;
-  transition: transform 0.08s ease, filter 0.15s ease;
-}
-.btn-primary:active { transform: scale(0.98); filter: brightness(1.1); }
-.btn-primary:disabled { opacity: 0.35; }
+  .btn-ghost {
+    border: 1px solid var(--color-line);
+    border-radius: 10px;
+    padding: 0.65rem 1.2rem;
+    font-weight: 500;
+    font-size: 0.8rem;
+    letter-spacing: 0.04em;
+    color: #c9c9d2;
+    background: transparent;
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+  .btn-ghost:active { background: rgba(255, 255, 255, 0.06); border-color: rgba(255,255,255,0.2); }
 
-.btn-ghost {
-  border: 1px solid var(--color-line);
-  border-radius: 10px;
-  padding: 0.65rem 1.2rem;
-  font-weight: 500;
-  font-size: 0.8rem;
-  letter-spacing: 0.04em;
-  color: #c9c9d2;
-  background: transparent;
-  transition: background 0.15s ease, border-color 0.15s ease;
-}
-.btn-ghost:active { background: rgba(255, 255, 255, 0.06); border-color: rgba(255,255,255,0.2); }
+  .input {
+    background: var(--color-surface-2);
+    border: 1px solid var(--color-line);
+    border-radius: 8px;
+    padding: 0.6rem 0.85rem;
+    color: #ededf0;
+    width: 100%;
+    outline: none;
+    transition: border-color 0.15s ease;
+  }
+  .input:focus { border-color: var(--color-accent); }
 
-.input {
-  background: var(--color-surface-2);
-  border: 1px solid var(--color-line);
-  border-radius: 8px;
-  padding: 0.6rem 0.85rem;
-  color: #ededf0;
-  width: 100%;
-  outline: none;
-  transition: border-color 0.15s ease;
-}
-.input:focus { border-color: var(--color-accent); }
-
-.chip {
-  border-radius: 7px;
-  padding: 0.4rem 0.8rem;
-  font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  border: 1px solid var(--color-line);
-  background: transparent;
-  color: var(--color-muted);
-  transition: all 0.15s ease;
-}
-.chip-active {
-  background: var(--color-accent);
-  color: #0a0a0b;
-  border-color: var(--color-accent);
+  .chip {
+    border-radius: 7px;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    border: 1px solid var(--color-line);
+    background: transparent;
+    color: var(--color-muted);
+    transition: all 0.15s ease;
+  }
+  .chip-active {
+    background: var(--color-accent);
+    color: #0a0a0b;
+    border-color: var(--color-accent);
+  }
 }
 
 .accent-text { color: var(--color-accent); }

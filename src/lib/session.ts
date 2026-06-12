@@ -1,5 +1,26 @@
 import { buildSets, recommend } from './overload'
-import { uid, type AppData, type SessionExercise, type Template, type WorkoutSession } from './types'
+import {
+  uid, type AppData, type SessionExercise, type Template, type TemplateExercise, type WorkoutSession,
+} from './types'
+
+// Convert a (possibly in-progress) session into reusable template exercises.
+export function sessionToTemplateExercises(session: WorkoutSession): TemplateExercise[] {
+  return session.exercises.map(ex => ({
+    exerciseId: ex.exerciseId,
+    sets: ex.sets.length || 1,
+    reps: ex.sets[0]?.target?.reps ?? ex.sets[0]?.reps ?? 8,
+    restSeconds: ex.restSeconds,
+  }))
+}
+
+// Did the workout structurally change vs the template it started from?
+export function differsFromTemplate(session: WorkoutSession, template?: Template): boolean {
+  if (!template) return true
+  if (session.exercises.length !== template.exercises.length) return true
+  return session.exercises.some((ex, i) =>
+    ex.exerciseId !== template.exercises[i].exerciseId || ex.sets.length !== template.exercises[i].sets,
+  )
+}
 
 // Create a session, pre-filling each exercise with coached targets.
 export function createSession(data: AppData, template?: Template): WorkoutSession {

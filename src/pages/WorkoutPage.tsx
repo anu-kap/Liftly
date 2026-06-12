@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { useApp } from '../state/AppContext'
 import { exerciseById } from '../lib/exercises'
 import { detectPRs, type PR } from '../lib/overload'
-import { addExerciseToSession } from '../lib/session'
-import { uid, type Exercise, type SetEntry, type WorkoutSession } from '../lib/types'
+import { addExerciseToSession, differsFromTemplate, sessionToTemplateExercises } from '../lib/session'
+import { uid, type Exercise, type SetEntry, type Template, type WorkoutSession } from '../lib/types'
 import ExercisePicker from '../components/ExercisePicker'
 import ExerciseSheet from '../components/ExerciseSheet'
 import RestTimer from '../components/RestTimer'
@@ -21,6 +21,11 @@ export default function WorkoutPage() {
   const [prs, setPrs] = useState<PR[] | null>(null)
   const [statsFor, setStatsFor] = useState<Exercise | null>(null)
   const [now, setNow] = useState(session?.startedAt ?? 0)
+  // Finish dialog: template-saving options
+  const sourceTemplate = data.templates.find(t => t.id === session?.templateId)
+  const [saveAsNew, setSaveAsNew] = useState(false)
+  const [updateSource, setUpdateSource] = useState(true)
+  const [tmplName, setTmplName] = useState('')
 
   // Live elapsed-time header.
   useEffect(() => {
@@ -93,11 +98,37 @@ export default function WorkoutPage() {
   const finish = () => {
     const done: WorkoutSession = { ...session, endedAt: Date.now() }
     const newPrs = detectPRs(data.sessions, done)
-    update(d => ({ ...d, activeSession: null, sessions: [...d.sessions, done] }))
+    const tmplExercises = sessionToTemplateExercises(done)
+    update(d => {
+      let templates = d.templates
+      // Update the template this workout started from, if requested.
+      if (updateSource && sourceTemplate && session.exercises.length > 0) {
+        templates = templates.map(t => t.id === sourceTemplate.id ? { ...t, exercises: tmplExercises } : t)
+      }
+      // Save the workout as a brand-new template, if requested.
+      if (saveAsNew && session.exercises.length > 0) {
+        const newTpl: Template = {
+          id: uid(),
+          name: tmplName.trim() || done.name || 'My Template',
+          exercises: tmplExercises,
+        }
+        templates = [...templates, newTpl]
+      }
+      return { ...d, activeSession: null, sessions: [...d.sessions, done], templates }
+    })
     setConfirmFinish(false)
     if (newPrs.length > 0) setPrs(newPrs)
     else navigate('/')
   }
+
+  const openFinish = () => {
+    setSaveAsNew(!sourceTemplate)          // freestyle → default to saving a template
+    setUpdateSource(!!sourceTemplate)
+    setTmplName(session.name === 'Freestyle Workout' ? '' : session.name)
+    setConfirmFinish(true)
+  }
+
+  const templateChanged = differsFromTemplate(session, sourceTemplate)
 
   const discard = () => {
     update(d => ({ ...d, activeSession: null }))
@@ -125,7 +156,7 @@ export default function WorkoutPage() {
         </div>
         <div className="flex gap-2">
           <button className="btn-ghost !px-3 !py-1.5 text-xs text-(--color-bad)" onClick={discard}>Discard</button>
-          <button className="btn-primary !px-4 !py-1.5 text-xs" onClick={() => setConfirmFinish(true)}>Finish</button>
+          <button className="btn-primary !px-4 !py-1.5 text-xs" onClick={openFinish}>Finish</button>
         </div>
       </header>
 
@@ -226,10 +257,50 @@ export default function WorkoutPage() {
       )}
 
       {confirmFinish && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-6 backdrop-blur-sm" onClick={() => setConfirmFinish(false)}>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 p-6 backdrop-blur-sm" onClick={() => setConfirmFinish(false)}>
           <div className="card animate-pop w-full max-w-sm p-6" onClick={e => e.stopPropagation()}>
             <h2 className="text-lg font-semibold">Finish workout?</h2>
-            <p className="mt-1 text-sm text-zinc-400">{doneSets} of {totalSets} sets completed.</p>
+            <p className="num mt-1 text-sm text-zinc-400">{doneSets} of {totalSets} sets completed.</p>
+
+            {session.exercises.length > 0 && (
+              <div className="mt-4 space-y-2">
+                {/* Update the template this workout came from */}
+                {sourceTemplate && templateChanged && (
+                  <button
+                    className={`flex w-full items-center gap-3 rounded-xl border p-3 text-left transition-colors ${updateSource ? 'border-(--color-accent)/60 bg-(--color-accent-dim)' : 'border-(--color-line)'}`}
+                    onClick={() => setUpdateSource(v => !v)}
+                  >
+                    <Checkbox on={updateSource} />
+                    <span className="min-w-0 text-sm">
+                      <span className="font-medium">Update "{sourceTemplate.name}"</span>
+                      <span className="block text-xs text-zinc-500">Save your changes to this template</span>
+                    </span>
+                  </button>
+                )}
+
+                {/* Save as a brand-new template */}
+                <button
+                  className={`flex w-full items-center gap-3 rounded-xl border p-3 text-left transition-colors ${saveAsNew ? 'border-(--color-accent)/60 bg-(--color-accent-dim)' : 'border-(--color-line)'}`}
+                  onClick={() => setSaveAsNew(v => !v)}
+                >
+                  <Checkbox on={saveAsNew} />
+                  <span className="text-sm">
+                    <span className="font-medium">Save as new template</span>
+                    <span className="block text-xs text-zinc-500">Reuse this workout anytime</span>
+                  </span>
+                </button>
+                {saveAsNew && (
+                  <input
+                    className="input text-sm"
+                    placeholder="Template name"
+                    value={tmplName}
+                    onChange={e => setTmplName(e.target.value)}
+                    autoFocus
+                  />
+                )}
+              </div>
+            )}
+
             <div className="mt-5 flex gap-2">
               <button className="btn-ghost flex-1" onClick={() => setConfirmFinish(false)}>Keep going</button>
               <button className="btn-primary flex-1" onClick={finish}>Finish</button>
@@ -268,6 +339,13 @@ function PRCelebration({ prs, unit, onClose, customExercises }: {
 
 function CheckIcon() {
   return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12.5 10 18 20 6" /></svg>
+}
+function Checkbox({ on }: { on: boolean }) {
+  return (
+    <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border ${on ? 'border-(--color-accent) bg-(--color-accent) text-black' : 'border-white/25 text-transparent'}`}>
+      <CheckIcon />
+    </span>
+  )
 }
 function XIcon() {
   return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
