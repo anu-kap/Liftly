@@ -16,15 +16,15 @@ export default function BottomNav() {
 
   return (
     <nav className="fixed bottom-0 left-1/2 z-40 w-full max-w-lg -translate-x-1/2 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-      <div className="card flex items-center justify-between px-3 py-2 shadow-2xl shadow-black/60">
+      <div className="card flex items-center justify-between bg-(--color-surface)/90 px-3 py-2 shadow-2xl shadow-black/70 backdrop-blur-md">
         {tabs.map(t =>
           t.icon ? (
             <NavLink
               key={t.to}
               to={t.to}
               className={({ isActive }) =>
-                `flex flex-col items-center gap-0.5 rounded-xl px-3 py-1.5 text-[0.65rem] font-medium transition-colors ${
-                  isActive ? 'text-violet-400' : 'text-zinc-500'
+                `flex flex-col items-center gap-0.5 rounded-xl px-3 py-1.5 text-[0.6rem] font-medium tracking-wide transition-colors ${
+                  isActive ? 'text-(--color-accent)' : 'text-zinc-500'
                 }`
               }
             >
@@ -35,7 +35,7 @@ export default function BottomNav() {
             <button
               key="train"
               onClick={() => navigate(inProgress ? '/workout' : '/templates')}
-              className={`btn-primary -mt-7 flex h-14 w-14 items-center justify-center rounded-full !p-0 text-2xl ${inProgress ? 'timer-pulse' : ''}`}
+              className={`btn-primary -mt-7 flex h-14 w-14 items-center justify-center !rounded-2xl !p-0 ${inProgress ? 'timer-pulse' : ''}`}
               aria-label={inProgress ? 'Resume workout' : 'Start workout'}
             >
               {inProgress ? <ResumeIcon /> : <PlusIcon />}

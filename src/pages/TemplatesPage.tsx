@@ -44,16 +44,16 @@ export default function TemplatesPage() {
   return (
     <div className="px-5 pt-8">
       <header className="mb-5 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Workouts</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Workouts</h1>
         <button
           className="btn-ghost !px-3 !py-1.5 text-xs"
           onClick={() => setEditing({ id: uid(), name: 'New Template', exercises: [] })}
-        >+ New template</button>
+        >New template</button>
       </header>
 
       {hasActive && (
-        <button className="card mb-4 w-full border-violet-500/50 bg-violet-500/10 p-4 text-left" onClick={() => navigate('/workout')}>
-          <p className="text-sm font-semibold text-violet-300">Workout in progress — tap to resume</p>
+        <button className="card mb-4 w-full border-(--color-accent)/40 bg-(--color-accent-dim) p-4 text-left" onClick={() => navigate('/workout')}>
+          <p className="text-sm font-semibold accent-text">Workout in progress — tap to resume</p>
         </button>
       )}
 
@@ -76,7 +76,7 @@ export default function TemplatesPage() {
               <button className="btn-primary flex-1 !py-2 text-sm" onClick={() => start(t)}>Start</button>
               <button className="btn-ghost !py-2 text-sm" onClick={() => setEditing(structuredClone(t))}>Edit</button>
               <button
-                className="btn-ghost !py-2 text-sm text-rose-400"
+                className="btn-ghost !py-2 text-sm text-(--color-bad)"
                 onClick={() => update(d => ({ ...d, templates: d.templates.filter(x => x.id !== t.id) }))}
               >Delete</button>
             </div>
@@ -85,8 +85,8 @@ export default function TemplatesPage() {
       </div>
 
       {data.templates.length === 0 && (
-        <button className="card mt-2 w-full p-5 text-center text-sm text-zinc-400" onClick={regenerate}>
-          ✨ Generate a plan from my goals
+        <button className="card mt-2 w-full p-5 text-center text-sm accent-text" onClick={regenerate}>
+          Generate a plan from my goals
         </button>
       )}
 
@@ -138,7 +138,7 @@ function TemplateEditor({ template, onSave, onClose }: { template: Template; onS
                 <div className="flex items-center gap-1 text-zinc-500">
                   <button className="px-1.5" onClick={() => move(i, -1)} aria-label="Move up">↑</button>
                   <button className="px-1.5" onClick={() => move(i, 1)} aria-label="Move down">↓</button>
-                  <button className="px-1.5 text-rose-400" onClick={() => setTpl(t => ({ ...t, exercises: t.exercises.filter((_, j) => j !== i) }))} aria-label="Remove">✕</button>
+                  <button className="px-1.5 text-(--color-bad)" onClick={() => setTpl(t => ({ ...t, exercises: t.exercises.filter((_, j) => j !== i) }))} aria-label="Remove">✕</button>
                 </div>
               </div>
               <div className="mt-2 grid grid-cols-3 gap-2">

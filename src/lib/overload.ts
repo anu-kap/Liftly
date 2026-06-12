@@ -54,13 +54,40 @@ export function roundToIncrement(weight: number, unit: 'lb' | 'kg'): number {
   return Math.round(weight / inc) * inc
 }
 
+export interface SetTarget { weight: number; reps: number }
+
 export interface Recommendation {
   sets: number
   reps: number
   weight: number
   rationale: string
+  perSet: SetTarget[]      // per-set overload targets vs last session
   onTrack?: boolean        // only when a goal exists
   paceNote?: string
+}
+
+// Last completed working sets per session for an exercise, newest first.
+export interface PastSession { date: number; sets: { weight: number; reps: number }[] }
+
+export function lastSessions(sessions: WorkoutSession[], exerciseId: string, n: number): PastSession[] {
+  const out: PastSession[] = []
+  const sorted = [...sessions].filter(s => s.endedAt).sort((a, b) => b.endedAt! - a.endedAt!)
+  for (const s of sorted) {
+    for (const ex of s.exercises) {
+      if (ex.exerciseId !== exerciseId) continue
+      const working = ex.sets.filter(st => st.done && st.type !== 'warmup' && st.reps > 0)
+        .map(st => ({ weight: st.weight, reps: st.reps }))
+      if (working.length > 0) out.push({ date: s.endedAt!, sets: working })
+    }
+    if (out.length >= n) break
+  }
+  return out.slice(0, n)
+}
+
+// Improve one past set by the double-progression rule.
+function progressSet(prev: { weight: number; reps: number }, high: number, low: number, inc: number, unit: 'lb' | 'kg'): SetTarget {
+  if (prev.reps >= high) return { weight: roundToIncrement(prev.weight + inc, unit), reps: low }
+  return { weight: prev.weight, reps: prev.reps + 1 }
 }
 
 // Rep ranges by training focus (double-progression scheme).
@@ -90,32 +117,46 @@ export function recommend(
   const unit = profile.unit
   const inc = increment(unit)
 
+  const fill = (sets: number, weight: number, reps: number): SetTarget[] =>
+    Array.from({ length: sets }, () => ({ weight, reps }))
+
   if (history.length === 0) {
     if (goal) {
       // Start at ~65% of the goal e1RM — a comfortable on-ramp.
-      const startWeight = roundToIncrement(weightForReps(e1rm(goal.targetWeight, goal.targetReps), range.low) * 0.65, unit)
+      const startWeight = Math.max(roundToIncrement(weightForReps(e1rm(goal.targetWeight, goal.targetReps), range.low) * 0.65, unit), inc)
       return {
-        sets: range.sets, reps: range.low, weight: Math.max(startWeight, inc),
+        sets: range.sets, reps: range.low, weight: startWeight,
+        perSet: fill(range.sets, startWeight, range.low),
         rationale: 'First session — starting at ~65% of your goal to build a base.',
       }
     }
-    return { sets: range.sets, reps: range.low, weight: 0, rationale: 'First time — pick a weight you can lift with clean form.' }
+    return {
+      sets: range.sets, reps: range.low, weight: 0,
+      perSet: fill(range.sets, 0, range.low),
+      rationale: 'First time — pick a weight you can lift with clean form.',
+    }
   }
 
   const last = history[history.length - 1]
+  // Per-set targets: improve each set you did last time, one by one.
+  const prevSets = lastSessions(sessions, exerciseId, 1)[0]?.sets ?? []
+  const perSet = prevSets.map(p => progressSet(p, range.high, range.low, inc, unit))
+
   let rec: Recommendation
   if (last.topReps >= range.high) {
+    const w = roundToIncrement(last.topWeight + inc, unit)
     rec = {
-      sets: range.sets, reps: range.low,
-      weight: roundToIncrement(last.topWeight + inc, unit),
-      rationale: `You hit ${last.topReps} reps @ ${last.topWeight} ${unit} — time to add weight.`,
+      sets: Math.max(perSet.length, range.sets), reps: range.low, weight: w,
+      perSet: perSet.length ? perSet : fill(range.sets, w, range.low),
+      rationale: `Hit ${last.topReps} reps @ ${last.topWeight} ${unit} last time — adding weight.`,
     }
   } else {
     rec = {
-      sets: range.sets,
+      sets: Math.max(perSet.length, range.sets),
       reps: Math.min(last.topReps + 1, range.high),
       weight: last.topWeight,
-      rationale: `Last time: ${last.topReps} reps @ ${last.topWeight} ${unit}. Push for one more rep.`,
+      perSet: perSet.length ? perSet : fill(range.sets, last.topWeight, Math.min(last.topReps + 1, range.high)),
+      rationale: `Last time: ${last.topReps} reps @ ${last.topWeight} ${unit}. Beat each set by one rep.`,
     }
   }
 
@@ -127,6 +168,7 @@ export function recommend(
     if (!pace.onTrack && rec.weight === last.topWeight && last.topReps >= range.high - 1) {
       rec.weight = roundToIncrement(last.topWeight + inc, unit)
       rec.reps = range.low
+      rec.perSet = rec.perSet.map(() => ({ weight: rec.weight, reps: range.low }))
       rec.rationale = 'Behind goal pace — adding weight to catch up.'
     }
   }
@@ -157,7 +199,7 @@ export function goalPace(history: ExercisePoint[], goal: ExerciseGoal): GoalPace
   const onTrack = current >= expected * 0.97 // 3% tolerance
 
   let note: string
-  if (current >= targetE1rm) note = 'Goal reached! Set a new one 🎉'
+  if (current >= targetE1rm) note = 'Goal reached — set a new one.'
   else if (now > targetDate) note = 'Goal date passed — consider extending the date.'
   else if (onTrack) note = `On track — ${Math.round(pct * 100)}% of the way there.`
   else note = `Slightly behind pace (${Math.round(pct * 100)}% there). Keep pushing.`
@@ -233,9 +275,14 @@ export function muscleSplit(sessions: WorkoutSession[], days: number, lookup: (i
   return out
 }
 
-// Pre-fill a session exercise's sets from the recommendation.
-export function buildSets(rec: Recommendation, makeId: () => string): SessionExercise['sets'] {
-  return Array.from({ length: rec.sets }, () => ({
-    id: makeId(), type: 'normal' as const, weight: rec.weight, reps: rec.reps, done: false,
-  }))
+// Pre-fill a session exercise's sets from the recommendation, carrying
+// the per-set overload target onto each set.
+export function buildSets(rec: Recommendation, count: number, makeId: () => string): SessionExercise['sets'] {
+  return Array.from({ length: count }, (_, i) => {
+    const t = rec.perSet[i] ?? rec.perSet[rec.perSet.length - 1] ?? { weight: rec.weight, reps: rec.reps }
+    return {
+      id: makeId(), type: 'normal' as const, weight: t.weight, reps: t.reps, done: false,
+      target: { weight: t.weight, reps: t.reps },
+    }
+  })
 }

@@ -17,7 +17,7 @@ const RANGES = [
   { label: 'All', days: 36500 },
 ]
 
-const PALETTE = ['#8b5cf6', '#d946ef', '#34d399', '#fbbf24', '#38bdf8', '#fb7185', '#a3e635', '#f97316', '#22d3ee', '#e879f9', '#facc15', '#4ade80']
+const PALETTE = ['#d3ff3a', '#9caf2e', '#6b7a25', '#e8e8ec', '#a9a9b2', '#74747e', '#d3ff3a', '#9caf2e', '#6b7a25', '#e8e8ec', '#a9a9b2', '#74747e']
 
 export default function AnalyticsPage() {
   const { data } = useApp()
@@ -69,7 +69,7 @@ export default function AnalyticsPage() {
   return (
     <div className="px-5 pt-8">
       <header className="mb-4 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Insights</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Insights</h1>
         <div className="flex gap-1">
           {RANGES.map(r => (
             <button key={r.label} className={`chip !px-2.5 !py-1 text-xs ${rangeDays === r.days ? 'chip-active' : ''}`} onClick={() => setRangeDays(r.days)}>
@@ -81,14 +81,14 @@ export default function AnalyticsPage() {
 
       {trained.length === 0 ? (
         <div className="card p-8 text-center text-sm text-zinc-500">
-          Charts appear after your first logged workout. Go lift something heavy 💪
+          Charts appear after your first logged workout. Go lift something heavy.
         </div>
       ) : (
         <>
           <section className="card mb-4 p-4">
             <div className="mb-2 flex items-center justify-between gap-2">
-              <h2 className="text-sm font-semibold text-zinc-300">Strength progress</h2>
-              {exerciseId && <Link className="text-xs text-violet-400" to={`/exercise/${exerciseId}`}>Detail →</Link>}
+              <h2 className="label">Strength progress</h2>
+              {exerciseId && <Link className="text-xs accent-text" to={`/exercise/${exerciseId}`}>Detail</Link>}
             </div>
             <select
               className="input mb-3 !py-2 text-sm"
@@ -107,16 +107,16 @@ export default function AnalyticsPage() {
                 <AreaChart data={strengthData} margin={{ left: -14, right: 6, top: 6 }}>
                   <defs>
                     <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#8b5cf6" stopOpacity={0.45} />
-                      <stop offset="100%" stopColor="#8b5cf6" stopOpacity={0} />
+                      <stop offset="0%" stopColor="#d3ff3a" stopOpacity={0.35} />
+                      <stop offset="100%" stopColor="#d3ff3a" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid stroke="rgba(255,255,255,0.06)" vertical={false} />
                   <XAxis dataKey="date" tickFormatter={d => format(d, 'M/d')} tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} domain={['auto', 'auto']} />
                   <Tooltip content={<ChartTip unit={unit} />} />
-                  <Area type="monotone" dataKey="e1RM" stroke="#a78bfa" strokeWidth={2.5} fill="url(#g1)" dot={{ r: 3, fill: '#a78bfa' }} />
-                  <Area type="monotone" dataKey="Top weight" stroke="#d946ef" strokeWidth={1.5} fill="none" strokeDasharray="4 4" dot={false} />
+                  <Area type="monotone" dataKey="e1RM" stroke="#d3ff3a" strokeWidth={2.5} fill="url(#g1)" dot={{ r: 3, fill: '#d3ff3a' }} />
+                  <Area type="monotone" dataKey="Top weight" stroke="#a9a9b2" strokeWidth={1.5} fill="none" strokeDasharray="4 4" dot={false} />
                 </AreaChart>
               </ResponsiveContainer>
             ) : (
@@ -130,7 +130,7 @@ export default function AnalyticsPage() {
           </section>
 
           <section className="card mb-4 p-4">
-            <h2 className="mb-3 text-sm font-semibold text-zinc-300">Weekly volume ({unit})</h2>
+            <h2 className="label mb-3">Weekly volume ({unit})</h2>
             {volumeData.length > 0 ? (
               <ResponsiveContainer width="100%" height={180}>
                 <BarChart data={volumeData} margin={{ left: -8, right: 6 }}>
@@ -138,8 +138,8 @@ export default function AnalyticsPage() {
                   <XAxis dataKey="week" tick={{ fill: '#71717a', fontSize: 10 }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fill: '#71717a', fontSize: 10 }} axisLine={false} tickLine={false} />
                   <Tooltip content={<ChartTip unit={unit} />} cursor={{ fill: 'rgba(255,255,255,0.04)' }} />
-                  <Bar dataKey="Volume" radius={[6, 6, 0, 0]}>
-                    {volumeData.map((_, i) => <Cell key={i} fill={i === volumeData.length - 1 ? '#d946ef' : '#8b5cf6'} />)}
+                  <Bar dataKey="Volume" radius={[5, 5, 0, 0]}>
+                    {volumeData.map((_, i) => <Cell key={i} fill={i === volumeData.length - 1 ? '#d3ff3a' : 'rgba(211,255,58,0.35)'} />)}
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
@@ -149,7 +149,7 @@ export default function AnalyticsPage() {
           </section>
 
           <section className="card mb-4 p-4">
-            <h2 className="mb-3 text-sm font-semibold text-zinc-300">Muscle balance (sets)</h2>
+            <h2 className="label mb-3">Muscle balance (sets)</h2>
             {splitData.length > 0 ? (
               <ResponsiveContainer width="100%" height={Math.max(160, splitData.length * 34)}>
                 <BarChart data={splitData} layout="vertical" margin={{ left: 8, right: 16 }}>
@@ -179,10 +179,10 @@ export function ChartTip({ active, payload, label, unit }: {
 }) {
   if (!active || !payload?.length) return null
   return (
-    <div className="card !rounded-lg border-white/15 bg-zinc-900/95 px-3 py-2 text-xs shadow-xl">
+    <div className="card num !rounded-lg border-white/15 bg-zinc-900/95 px-3 py-2 text-xs shadow-xl">
       <p className="mb-1 font-semibold text-zinc-300">{typeof label === 'number' ? format(label, 'MMM d, yyyy') : label}</p>
       {payload.map(p => (
-        <p key={p.name} style={{ color: p.color ?? '#a78bfa' }}>
+        <p key={p.name} style={{ color: p.color ?? '#d3ff3a' }}>
           {p.name}: <strong>{Math.round(p.value * 10) / 10}</strong> {p.name === 'Reps' ? '' : unit}
         </p>
       ))}

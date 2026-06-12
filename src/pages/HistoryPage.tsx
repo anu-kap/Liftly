@@ -4,10 +4,12 @@ import { useApp } from '../state/AppContext'
 import { exerciseById } from '../lib/exercises'
 import { sessionSets, sessionVolume } from '../lib/overload'
 import type { WorkoutSession } from '../lib/types'
+import MiniCalendar from '../components/MiniCalendar'
 
 export default function HistoryPage() {
   const { data, update } = useApp()
   const [open, setOpen] = useState<WorkoutSession | null>(null)
+  const [calendarOpen, setCalendarOpen] = useState(false)
   const completed = data.sessions.filter(s => s.endedAt).sort((a, b) => b.endedAt! - a.endedAt!)
 
   // Group by month for scannability.
@@ -19,7 +21,19 @@ export default function HistoryPage() {
 
   return (
     <div className="px-5 pt-8">
-      <h1 className="mb-5 text-2xl font-bold">History</h1>
+      <header className="mb-5 flex items-center justify-between">
+        <h1 className="text-2xl font-bold tracking-tight">History</h1>
+        <button
+          className="btn-ghost flex h-9 w-9 items-center justify-center !rounded-lg !p-0"
+          onClick={() => setCalendarOpen(true)}
+          aria-label="Open training calendar"
+        >
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+            <rect x="3" y="5" width="18" height="16" rx="3" />
+            <path d="M3 10h18M8 3v4M16 3v4" />
+          </svg>
+        </button>
+      </header>
 
       {completed.length === 0 && (
         <div className="card p-6 text-center text-sm text-zinc-500">No workouts logged yet.</div>
@@ -27,7 +41,7 @@ export default function HistoryPage() {
 
       {[...groups.entries()].map(([month, sessions]) => (
         <section key={month} className="mb-5">
-          <h2 className="mb-2 text-sm font-semibold text-zinc-400">{month.toUpperCase()}</h2>
+          <h2 className="label mb-2">{month}</h2>
           <div className="space-y-2.5">
             {sessions.map(s => (
               <button key={s.id} className="card w-full p-4 text-left" onClick={() => setOpen(s)}>
@@ -35,7 +49,7 @@ export default function HistoryPage() {
                   <p className="font-semibold">{s.name}</p>
                   <p className="text-xs text-zinc-500">{format(s.endedAt!, 'EEE, MMM d')}</p>
                 </div>
-                <p className="mt-1 text-xs text-zinc-500">
+                <p className="num mt-1 text-xs text-zinc-500">
                   {s.exercises.length} exercises · {sessionSets(s)} sets · {Math.round(sessionVolume(s)).toLocaleString()} {data.profile.unit}
                   {' · '}{Math.round((s.endedAt! - s.startedAt) / 60000)} min
                 </p>
@@ -59,18 +73,18 @@ export default function HistoryPage() {
               {open.exercises.map(ex => (
                 <div key={ex.id} className="card p-3">
                   <p className="text-sm font-semibold">{exerciseById(ex.exerciseId, data.customExercises)?.name ?? ex.exerciseId}</p>
-                  <div className="mt-1.5 space-y-0.5 text-sm text-zinc-400">
-                    {ex.sets.filter(st => st.done).map((st, i) => (
-                      <p key={st.id} className="font-mono text-xs">
-                        {i + 1} — {st.weight} {data.profile.unit} × {st.reps}{st.type === 'warmup' ? ' (warmup)' : ''}
-                      </p>
+                  <div className="mt-1.5 flex flex-wrap gap-1.5">
+                    {ex.sets.filter(st => st.done).map(st => (
+                      <span key={st.id} className="num rounded-md border border-(--color-line) px-2 py-0.5 text-xs text-zinc-300">
+                        {st.weight}<span className="text-zinc-600">×</span>{st.reps}{st.type === 'warmup' ? <span className="text-zinc-600"> w</span> : ''}
+                      </span>
                     ))}
                   </div>
                 </div>
               ))}
             </div>
             <button
-              className="btn-ghost mt-3 w-full text-rose-400"
+              className="btn-ghost mt-3 w-full text-(--color-bad)"
               onClick={() => {
                 update(d => ({ ...d, sessions: d.sessions.filter(s => s.id !== open.id) }))
                 setOpen(null)
@@ -79,6 +93,8 @@ export default function HistoryPage() {
           </div>
         </div>
       )}
+
+      {calendarOpen && <MiniCalendar sessions={data.sessions} onClose={() => setCalendarOpen(false)} />}
     </div>
   )
 }

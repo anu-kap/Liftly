@@ -15,8 +15,8 @@ export default defineConfig({
         name: 'Liftly — Fitness Tracker',
         short_name: 'Liftly',
         description: 'Beautiful workout tracking with progressive overload coaching',
-        theme_color: '#09090f',
-        background_color: '#09090f',
+        theme_color: '#0a0a0b',
+        background_color: '#0a0a0b',
         display: 'standalone',
         orientation: 'portrait',
         icons: [

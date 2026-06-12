@@ -21,11 +21,11 @@ export default function SettingsPage() {
 
   return (
     <div className="px-5 pt-8 pb-8">
-      <h1 className="mb-5 text-2xl font-bold">Profile</h1>
+      <h1 className="mb-5 text-2xl font-bold tracking-tight">Profile</h1>
 
       {/* Account / sync */}
       <section className="card mb-4 p-4">
-        <h2 className="mb-2 text-sm font-semibold text-zinc-300">Account & cloud backup</h2>
+        <h2 className="label mb-2.5">Account & cloud backup</h2>
         {user ? (
           <>
             <div className="flex items-center gap-3">
@@ -36,9 +36,9 @@ export default function SettingsPage() {
               </div>
             </div>
             <p className="mt-2 text-xs">
-              {syncState === 'synced' && <span className="text-emerald-400">✓ All data synced to the cloud</span>}
-              {syncState === 'syncing' && <span className="text-amber-400">Syncing…</span>}
-              {syncState === 'error' && <span className="text-rose-400">Sync error — check your connection</span>}
+              {syncState === 'synced' && <span className="accent-text">All data synced to the cloud</span>}
+              {syncState === 'syncing' && <span className="text-(--color-warn)">Syncing…</span>}
+              {syncState === 'error' && <span className="text-(--color-bad)">Sync error — check your connection</span>}
             </p>
             <button className="btn-ghost mt-3 w-full !py-2 text-sm" onClick={logOut}>Sign out</button>
           </>
@@ -54,19 +54,19 @@ export default function SettingsPage() {
             >
               Continue with Google
             </button>
-            {signinError && <p className="mt-2 text-xs text-rose-400">{signinError}</p>}
+            {signinError && <p className="mt-2 text-xs text-(--color-bad)">{signinError}</p>}
           </>
         ) : (
           <p className="text-xs text-zinc-500">
             Running in <strong>local mode</strong> — data is saved on this device. To enable Google sign-in and cloud backup,
-            add your Firebase config (see <code className="text-violet-300">src/lib/firebaseConfig.ts</code> / README).
+            add your Firebase config (see <code className="accent-text">src/lib/firebaseConfig.ts</code> / README).
           </p>
         )}
       </section>
 
       {/* Training preferences */}
       <section className="card mb-4 p-4">
-        <h2 className="mb-3 text-sm font-semibold text-zinc-300">Training preferences</h2>
+        <h2 className="label mb-3">Training preferences</h2>
 
         <p className="mb-1.5 text-xs text-zinc-500">Focus</p>
         <div className="mb-3 flex gap-2">
@@ -102,25 +102,25 @@ export default function SettingsPage() {
         </div>
 
         <button
-          className="btn-ghost mt-4 w-full !py-2 text-sm"
+          className="btn-ghost mt-4 w-full !py-2 text-sm accent-text"
           onClick={() => update(d => ({ ...d, templates: [...generatePlan(d.profile), ...d.templates] }))}
         >
-          ✨ Regenerate plan from these settings
+          Regenerate plan from these settings
         </button>
       </section>
 
       {/* Goals */}
       <section className="card mb-4 p-4">
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-zinc-300">Lift goals</h2>
-          <button className="btn-ghost !px-3 !py-1 text-xs" onClick={() => setPickingGoal(true)}>+ Add goal</button>
+          <h2 className="label">Lift goals</h2>
+          <button className="btn-ghost !px-3 !py-1 text-xs" onClick={() => setPickingGoal(true)}>Add goal</button>
         </div>
         <div className="space-y-3">
           {p.exerciseGoals.map((g, i) => (
             <div key={g.exerciseId} className="rounded-xl border border-(--color-line) p-3">
               <div className="flex items-center justify-between">
                 <p className="text-sm font-medium">{exerciseById(g.exerciseId, data.customExercises)?.name ?? g.exerciseId}</p>
-                <button className="text-xs text-rose-400" onClick={() => setProfile({ exerciseGoals: p.exerciseGoals.filter((_, j) => j !== i) })}>Remove</button>
+                <button className="text-xs text-(--color-bad)" onClick={() => setProfile({ exerciseGoals: p.exerciseGoals.filter((_, j) => j !== i) })}>Remove</button>
               </div>
               <div className="mt-2 grid grid-cols-3 gap-2">
                 <label className="text-[0.65rem] text-zinc-500">TARGET {p.unit.toUpperCase()}
@@ -141,7 +141,7 @@ export default function SettingsPage() {
 
       {/* Danger zone */}
       <section className="card p-4">
-        <h2 className="mb-2 text-sm font-semibold text-zinc-300">Data</h2>
+        <h2 className="label mb-2.5">Data</h2>
         <button
           className="btn-ghost w-full !py-2 text-sm"
           onClick={() => {
@@ -153,7 +153,7 @@ export default function SettingsPage() {
             URL.revokeObjectURL(a.href)
           }}
         >Export data (JSON)</button>
-        <button className="btn-ghost mt-2 w-full !py-2 text-sm text-rose-400" onClick={() => setConfirmReset(true)}>Reset all data</button>
+        <button className="btn-ghost mt-2 w-full !py-2 text-sm text-(--color-bad)" onClick={() => setConfirmReset(true)}>Reset all data</button>
       </section>
 
       {pickingGoal && (
@@ -182,13 +182,13 @@ export default function SettingsPage() {
             <p className="mt-1 text-sm text-zinc-400">All workouts, templates and goals will be deleted{user ? ' from this device and the cloud' : ''}. This cannot be undone.</p>
             <div className="mt-5 flex gap-2">
               <button className="btn-ghost flex-1" onClick={() => setConfirmReset(false)}>Cancel</button>
-              <button className="btn-primary flex-1 !bg-rose-600 !bg-none !shadow-rose-600/30" onClick={() => { resetAll(); setConfirmReset(false) }}>Reset</button>
+              <button className="btn-primary flex-1 !bg-(--color-bad) !text-white" onClick={() => { resetAll(); setConfirmReset(false) }}>Reset</button>
             </div>
           </div>
         </div>
       )}
 
-      <p className="mt-6 text-center text-xs text-zinc-600">Liftly · {EXERCISES.length}+ exercises · made with 💜</p>
+      <p className="label mt-6 text-center !text-zinc-600">Liftly · {EXERCISES.length}+ exercises</p>
     </div>
   )
 }

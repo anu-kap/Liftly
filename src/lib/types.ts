@@ -20,6 +20,8 @@ export interface SetEntry {
   weight: number          // in user's unit
   reps: number
   done: boolean
+  // What this specific set must hit for progressive overload (vs last session)
+  target?: { weight: number; reps: number }
 }
 
 export interface SessionExercise {

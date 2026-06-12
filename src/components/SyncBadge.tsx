@@ -6,7 +6,7 @@ export default function SyncBadge() {
   const { user, syncState, cloudAvailable } = useApp()
 
   if (user) {
-    const color = syncState === 'synced' ? 'text-emerald-400' : syncState === 'error' ? 'text-rose-400' : 'text-amber-400'
+    const color = syncState === 'synced' ? 'text-(--color-accent)' : syncState === 'error' ? 'text-(--color-bad)' : 'text-(--color-warn)'
     const label = syncState === 'synced' ? 'Synced' : syncState === 'error' ? 'Sync error' : 'Syncing…'
     return (
       <Link to="/settings" className={`chip flex items-center gap-1.5 ${color}`}>

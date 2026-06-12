@@ -39,8 +39,8 @@ export default function ExerciseDetailPage() {
 
   return (
     <div className="px-5 pt-8">
-      <h1 className="text-2xl font-bold">{ex.name}</h1>
-      <p className="mb-4 text-sm text-zinc-500">{ex.muscleGroup} · {ex.equipment}</p>
+      <h1 className="text-2xl font-bold tracking-tight">{ex.name}</h1>
+      <p className="label mb-4 mt-1">{ex.muscleGroup} · {ex.equipment}</p>
 
       <div className="mb-4 grid grid-cols-3 gap-3">
         <Stat label={`Best e1RM (${unit})`} value={best ? Math.round(best).toString() : '—'} />
@@ -49,12 +49,16 @@ export default function ExerciseDetailPage() {
       </div>
 
       {rec && (
-        <div className="card mb-4 border-violet-500/40 bg-violet-500/5 p-4">
-          <p className="text-sm font-semibold text-violet-300">Next session target</p>
-          <p className="mt-1 text-lg font-bold">
-            {rec.sets} × {rec.reps} {rec.weight > 0 ? `@ ${rec.weight} ${unit}` : ''}
-          </p>
-          <p className="mt-0.5 text-xs text-zinc-500">{rec.rationale}</p>
+        <div className="card mb-4 border-(--color-accent)/40 bg-(--color-accent-dim) p-4">
+          <p className="label !text-(--color-accent)">Next session targets</p>
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {rec.perSet.map((t, i) => (
+              <span key={i} className="num rounded-md border border-(--color-accent)/40 px-2 py-1 text-sm font-semibold">
+                {t.weight > 0 ? `${t.weight}×${t.reps}` : `— × ${t.reps}`}
+              </span>
+            ))}
+          </div>
+          <p className="mt-2 text-xs text-zinc-400">{rec.rationale}</p>
         </div>
       )}
 
@@ -62,12 +66,12 @@ export default function ExerciseDetailPage() {
         <div className="card mb-4 p-4">
           <div className="flex justify-between text-sm">
             <p className="font-semibold">Goal pace</p>
-            <p className={pace.onTrack ? 'text-emerald-400' : 'text-amber-400'}>{pace.note}</p>
+            <p className={pace.onTrack ? 'accent-text' : 'text-(--color-warn)'}>{pace.note}</p>
           </div>
-          <div className="mt-2.5 h-2 overflow-hidden rounded-full bg-white/10">
-            <div className="h-full rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500" style={{ width: `${Math.round(pace.pctComplete * 100)}%` }} />
+          <div className="mt-2.5 h-1.5 overflow-hidden rounded-full bg-white/10">
+            <div className="h-full rounded-full bg-(--color-accent)" style={{ width: `${Math.round(pace.pctComplete * 100)}%` }} />
           </div>
-          <p className="mt-1.5 text-xs text-zinc-500">
+          <p className="num mt-1.5 text-xs text-zinc-500">
             Current e1RM {Math.round(pace.currentE1rm)} {unit} → goal {Math.round(pace.targetE1rm)} {unit} ({goal.targetWeight} × {goal.targetReps}) by {format(new Date(goal.targetDate + 'T12:00:00'), 'MMM d, yyyy')}
           </p>
         </div>
@@ -84,8 +88,8 @@ export default function ExerciseDetailPage() {
             <AreaChart data={chart} margin={{ left: -10, right: 6, top: 6 }}>
               <defs>
                 <linearGradient id="gd" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#d946ef" stopOpacity={0.4} />
-                  <stop offset="100%" stopColor="#d946ef" stopOpacity={0} />
+                  <stop offset="0%" stopColor="#d3ff3a" stopOpacity={0.35} />
+                  <stop offset="100%" stopColor="#d3ff3a" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid stroke="rgba(255,255,255,0.06)" vertical={false} />
@@ -93,9 +97,9 @@ export default function ExerciseDetailPage() {
               <YAxis tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} domain={['auto', 'auto']} />
               <Tooltip content={<ChartTip unit={metric === 'Reps' ? '' : unit} />} />
               {goal && metric === 'e1RM' && (
-                <ReferenceLine y={e1rm(goal.targetWeight, goal.targetReps)} stroke="#34d399" strokeDasharray="6 4" label={{ value: 'Goal', fill: '#34d399', fontSize: 11, position: 'insideTopRight' }} />
+                <ReferenceLine y={e1rm(goal.targetWeight, goal.targetReps)} stroke="#e8e8ec" strokeDasharray="6 4" label={{ value: 'Goal', fill: '#e8e8ec', fontSize: 11, position: 'insideTopRight' }} />
               )}
-              <Area type="monotone" dataKey={metric} stroke="#e879f9" strokeWidth={2.5} fill="url(#gd)" dot={{ r: 3, fill: '#e879f9' }} />
+              <Area type="monotone" dataKey={metric} stroke="#d3ff3a" strokeWidth={2.5} fill="url(#gd)" dot={{ r: 3, fill: '#d3ff3a' }} />
             </AreaChart>
           </ResponsiveContainer>
         ) : (
@@ -104,12 +108,12 @@ export default function ExerciseDetailPage() {
       </div>
 
       <section className="mt-4 pb-4">
-        <h2 className="mb-2 text-sm font-semibold text-zinc-400">SESSION LOG</h2>
+        <h2 className="label mb-2">Session log</h2>
         <div className="space-y-2">
           {[...history].reverse().map(p => (
             <div key={p.date} className="card flex items-center justify-between p-3 text-sm">
               <span className="text-zinc-400">{format(p.date, 'MMM d, yyyy')}</span>
-              <span className="font-mono text-xs">
+              <span className="num text-xs">
                 {p.topWeight} {unit} × {p.topReps} · e1RM {Math.round(p.bestE1rm)}
               </span>
             </div>

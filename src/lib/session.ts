@@ -13,7 +13,7 @@ export function createSession(data: AppData, template?: Template): WorkoutSessio
       exerciseId: te.exerciseId,
       restSeconds: te.restSeconds,
       target,
-      sets: buildSets({ ...rec, sets: te.sets }, uid),
+      sets: buildSets(rec, te.sets, uid),
     }
   })
   return {
@@ -33,7 +33,7 @@ export function addExerciseToSession(data: AppData, session: WorkoutSession, exe
     id: uid(),
     exerciseId,
     target: { sets: rec.sets, reps: rec.reps, weight: rec.weight, rationale: rec.rationale },
-    sets: buildSets(rec, uid),
+    sets: buildSets(rec, rec.sets, uid),
   }
   return { ...session, exercises: [...session.exercises, ex] }
 }
