@@ -42,7 +42,7 @@ export default function ExercisePicker({ onPick, onClose }: Props) {
         className="animate-pop flex max-h-[88dvh] w-full max-w-lg flex-col rounded-t-3xl border border-(--color-line) bg-(--color-surface) p-4"
         onClick={e => e.stopPropagation()}
       >
-        <div className="mb-3 flex items-center justify-between">
+        <div className="mb-3 flex shrink-0 items-center justify-between">
           <h2 className="text-lg font-semibold">Add exercise</h2>
           <button className="btn-ghost !px-3 !py-1 text-xs" onClick={onClose}>Close</button>
         </div>
@@ -62,8 +62,8 @@ export default function ExercisePicker({ onPick, onClose }: Props) {
           </div>
         ) : (
           <>
-            <input className="input mb-2" placeholder="Search exercises" value={query} onChange={e => setQuery(e.target.value)} />
-            <div className="mb-2 flex gap-1.5 overflow-x-auto pb-1">
+            <input className="input mb-2 shrink-0" placeholder="Search exercises" value={query} onChange={e => setQuery(e.target.value)} />
+            <div className="mb-2 flex shrink-0 gap-1.5 overflow-x-auto py-1">
               <button className={`chip shrink-0 ${group === null ? 'chip-active' : ''}`} onClick={() => setGroup(null)}>All</button>
               {MUSCLE_GROUPS.map(g => (
                 <button key={g} className={`chip shrink-0 ${group === g ? 'chip-active' : ''}`} onClick={() => setGroup(g)}>{g}</button>
@@ -101,7 +101,7 @@ export default function ExercisePicker({ onPick, onClose }: Props) {
               })}
               {list.length === 0 && <p className="py-6 text-center text-sm text-zinc-500">No matches.</p>}
             </div>
-            <button className="btn-ghost mt-2 w-full" onClick={() => { setCreating(true); setNewName(query) }}>
+            <button className="btn-ghost mt-2 w-full shrink-0" onClick={() => { setCreating(true); setNewName(query) }}>
               Create custom exercise
             </button>
           </>

@@ -90,7 +90,7 @@ export default function Dashboard() {
           <h2 className="label">Quick start</h2>
           <Link to="/templates" className="text-xs accent-text">All templates</Link>
         </div>
-        <div className="flex gap-3 overflow-x-auto pb-1">
+        <div className="flex gap-3 overflow-x-auto py-1">
           {data.templates.slice(0, 5).map(t => (
             <button
               key={t.id}

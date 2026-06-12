@@ -78,7 +78,7 @@ export default function ExerciseDetailPage() {
       )}
 
       <div className="card p-4">
-        <div className="mb-3 flex gap-1.5 overflow-x-auto">
+        <div className="mb-3 flex gap-1.5 overflow-x-auto py-1">
           {(['e1RM', 'Top weight', 'Volume', 'Reps'] as Metric[]).map(m => (
             <button key={m} className={`chip shrink-0 !px-3 !py-1 text-xs ${metric === m ? 'chip-active' : ''}`} onClick={() => setMetric(m)}>{m}</button>
           ))}

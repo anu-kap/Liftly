@@ -129,7 +129,7 @@ function TemplateEditor({ template, onSave, onClose }: { template: Template; onS
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm" onClick={onClose}>
       <div className="animate-pop flex max-h-[90dvh] w-full max-w-lg flex-col rounded-t-3xl border border-(--color-line) bg-(--color-surface) p-4" onClick={e => e.stopPropagation()}>
-        <input className="input mb-3 text-lg font-semibold" value={tpl.name} onChange={e => setTpl(t => ({ ...t, name: e.target.value }))} />
+        <input className="input mb-3 shrink-0 text-lg font-semibold" value={tpl.name} onChange={e => setTpl(t => ({ ...t, name: e.target.value }))} />
         <div className="flex-1 space-y-2 overflow-y-auto">
           {tpl.exercises.map((te, i) => (
             <div key={i} className="card p-3">
@@ -156,8 +156,8 @@ function TemplateEditor({ template, onSave, onClose }: { template: Template; onS
           ))}
           {tpl.exercises.length === 0 && <p className="py-6 text-center text-sm text-zinc-500">No exercises yet.</p>}
         </div>
-        <button className="btn-ghost mt-3 w-full" onClick={() => setPicking(true)}>+ Add exercise</button>
-        <div className="mt-2 flex gap-2">
+        <button className="btn-ghost mt-3 w-full shrink-0" onClick={() => setPicking(true)}>+ Add exercise</button>
+        <div className="mt-2 flex shrink-0 gap-2">
           <button className="btn-ghost flex-1" onClick={onClose}>Cancel</button>
           <button className="btn-primary flex-1" onClick={() => onSave(tpl)} disabled={!tpl.name.trim()}>Save</button>
         </div>

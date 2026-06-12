@@ -62,11 +62,11 @@ export default function HistoryPage() {
       {open && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm" onClick={() => setOpen(null)}>
           <div className="animate-pop flex max-h-[85dvh] w-full max-w-lg flex-col rounded-t-3xl border border-(--color-line) bg-(--color-surface) p-5" onClick={e => e.stopPropagation()}>
-            <div className="mb-1 flex items-center justify-between">
+            <div className="mb-1 flex shrink-0 items-center justify-between">
               <h2 className="text-lg font-semibold">{open.name}</h2>
               <button className="btn-ghost !px-3 !py-1 text-sm" onClick={() => setOpen(null)}>Close</button>
             </div>
-            <p className="mb-3 text-xs text-zinc-500">
+            <p className="mb-3 shrink-0 text-xs text-zinc-500">
               {format(open.endedAt!, 'EEEE, MMM d yyyy · h:mm a')} · {Math.round((open.endedAt! - open.startedAt) / 60000)} min
             </p>
             <div className="flex-1 space-y-3 overflow-y-auto">
@@ -84,7 +84,7 @@ export default function HistoryPage() {
               ))}
             </div>
             <button
-              className="btn-ghost mt-3 w-full text-(--color-bad)"
+              className="btn-ghost mt-3 w-full shrink-0 text-(--color-bad)"
               onClick={() => {
                 update(d => ({ ...d, sessions: d.sessions.filter(s => s.id !== open.id) }))
                 setOpen(null)
