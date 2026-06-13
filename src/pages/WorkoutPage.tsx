@@ -193,14 +193,22 @@ export default function WorkoutPage() {
                   <div key={st.id} className="mt-1.5 grid grid-cols-[1.6rem_1fr_1fr_1fr_2.2rem_1.2rem] items-center gap-2">
                     <span className="num text-center text-sm font-semibold text-zinc-500">{i + 1}</span>
                     <span className={`num text-center text-xs ${achieved ? 'text-(--color-accent)' : missed ? 'text-(--color-warn)' : 'text-zinc-500'}`}>
-                      {st.target && st.target.weight > 0 ? `${st.target.weight}×${st.target.reps}` : st.target ? `—×${st.target.reps}` : '—'}
+                      {st.target && st.target.weight !== 0 ? `${st.target.weight}×${st.target.reps}` : st.target ? `—×${st.target.reps}` : '—'}
                     </span>
-                    <input
-                      className={`input num !py-2 text-center text-sm ${achieved ? '!border-(--color-accent)/50 !bg-(--color-accent-dim)' : missed ? '!border-(--color-warn)/40' : ''}`}
-                      type="number" inputMode="decimal" value={st.weight || ''}
-                      placeholder={st.target ? String(st.target.weight || '') : '0'}
-                      onChange={e => setField(ex.id, st.id, 'weight', e.target.value)}
-                    />
+                    <div className="relative">
+                      <button
+                        type="button"
+                        className={`absolute left-1 top-1/2 z-10 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded text-xs font-bold ${st.weight < 0 ? 'text-(--color-warn)' : 'text-zinc-600'} active:text-(--color-accent)`}
+                        onClick={() => setField(ex.id, st.id, 'weight', String(-(st.weight || 0)))}
+                        aria-label="Toggle assisted (negative weight)"
+                      >±</button>
+                      <input
+                        className={`input num !py-2 pl-6 text-center text-sm ${achieved ? '!border-(--color-accent)/50 !bg-(--color-accent-dim)' : missed ? '!border-(--color-warn)/40' : ''}`}
+                        type="number" inputMode="decimal" value={st.weight || ''}
+                        placeholder={st.target ? String(st.target.weight || '') : '0'}
+                        onChange={e => setField(ex.id, st.id, 'weight', e.target.value)}
+                      />
+                    </div>
                     <input
                       className={`input num !py-2 text-center text-sm ${achieved ? '!border-(--color-accent)/50 !bg-(--color-accent-dim)' : missed ? '!border-(--color-warn)/40' : ''}`}
                       type="number" inputMode="numeric" value={st.reps || ''}

@@ -37,14 +37,21 @@ export default function ExercisePicker({ onPick, onClose }: Props) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/75 backdrop-blur-sm" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex justify-center bg-black/75" onClick={onClose}>
       <div
-        className="animate-pop flex max-h-[88dvh] w-full max-w-lg flex-col rounded-t-3xl border border-(--color-line) bg-(--color-surface) p-4"
+        className="flex h-full w-full max-w-lg flex-col border-x border-(--color-line) bg-(--color-surface) p-4"
+        style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}
         onClick={e => e.stopPropagation()}
       >
         <div className="mb-3 flex shrink-0 items-center justify-between">
           <h2 className="text-lg font-semibold">Add exercise</h2>
-          <button className="btn-ghost !px-3 !py-1 text-xs" onClick={onClose}>Close</button>
+          <button
+            className="flex h-9 w-9 items-center justify-center rounded-lg border border-(--color-line) text-zinc-400 active:bg-white/10"
+            onClick={onClose}
+            aria-label="Close"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
+          </button>
         </div>
 
         {creating ? (
